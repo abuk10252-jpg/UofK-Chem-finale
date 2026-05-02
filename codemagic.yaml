@@ -2,6 +2,7 @@ workflows:
   react-native-android:
     name: Android APK Build
     instance_type: mac_mini_m2
+
     triggering:
       events:
         - push
@@ -60,3 +61,6 @@ workflows:
       email:
         recipients:
           - abuk10252@gmail.com
+        notify:
+          success: true
+          failure: true
