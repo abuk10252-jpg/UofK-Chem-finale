@@ -25,14 +25,21 @@ workflows:
         script: |
           npm install --legacy-peer-deps
 
+      - name: Install EAS CLI
+        script: |
+          npm install -g eas-cli
+          echo "🚀 EAS CLI installed"
+
       - name: Build APK using EAS
         script: |
-          npx eas build -p android --profile preview --non-interactive
+          eas build -p android --profile preview --non-interactive
+          echo "📱 EAS build completed"
 
       - name: Copy APK to output
         script: |
           mkdir -p build_output
           find . -name "*.apk" -type f -exec cp {} build_output/ \;
+          echo "📤 APK copied to output"
 
     artifacts:
       - build_output/**
