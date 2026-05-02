@@ -22,15 +22,23 @@ export default function AdminUsersScreen() {
   useEffect(() => { fetchUsers(); }, []);
 
   async function fetchUsers() {
-    try {
-      const data = await apiCall('/admin/users');
-      setUsers(data.users);
-    } catch (e) {
-      Alert.alert('Error', 'Failed to load users');
-    } finally {
+  try {
+    const data = await apiCall('/admin/users');
+
+    // ✅ FIX: تحقق من data قبل استخدامه
+    if (!data?.users) {
+      Alert.alert('Error', 'Failed to load users. Check your connection.');
       setLoading(false);
+      return;
     }
+
+    setUsers(data.users);
+  } catch (e) {
+    Alert.alert('Error', 'Failed to load users');
+  } finally {
+    setLoading(false);
   }
+}
 
   async function handleApprove(userId: string) {
     try {
