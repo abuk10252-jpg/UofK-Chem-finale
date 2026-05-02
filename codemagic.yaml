@@ -32,7 +32,7 @@ workflows:
 
       - name: Verify Expo Token
         script: |
-          expo whoami
+          eas whoami
 
       - name: Build APK using EAS
         script: |
