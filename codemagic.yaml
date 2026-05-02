@@ -1,0 +1,36 @@
+workflows:
+  react-native-android:
+    name: Android APK Build
+    instance_type: mac_mini_m2
+    triggering:
+      events:
+        - push
+    environment:
+      vars:
+        APP_NAME: "UofK Chem"
+        PACKAGE_NAME: "com.uofkchem.app"
+        SERVER_URL: "https://server-2-xpsh.onrender.com"
+      node: 20 # التأكد من نسخة node مناسبة لـ Expo
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+      - name: Expo Prebuild
+        script: |
+          # السطر ده هو اللي بيكريت فولدر الـ android اللي كان ناقصك
+          npx expo prebuild --platform android
+      - name: Build Android APK
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+      - name: Copy APK
+        script: |
+          mkdir -p build_output
+          find android/app/build/outputs/apk/release -name "*.apk" -type f -exec cp {} build_output/ \;
+    artifacts:
+      - build_output/**
+    publishing:
+      email:
+        recipients:
+          - abuk10252@gmail.com
