@@ -46,21 +46,13 @@ workflows:
           cd android
           chmod +x gradlew
           ./gradlew assembleRelease
-          echo "📱 APK build completed"
-
-      - name: Copy APK to output
+      - name: Copy APK
         script: |
           mkdir -p build_output
-          find android/app/build/outputs -name "*.apk" -type f -exec cp {} build_output/ \;
-          echo "📤 APK copied to output"
-
+          find android/app/build/outputs/apk/release -name "*.apk" -type f -exec cp {} build_output/ \;
     artifacts:
       - build_output/**
-
     publishing:
       email:
         recipients:
           - abuk10252@gmail.com
-        notify:
-          success: true
-          failure: true
