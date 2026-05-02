@@ -2,23 +2,33 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
-import { AuthProvider } from '../src/context/AuthContext';
+import { AuthProvider, useAuth } from '../src/context/AuthContext';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-export default function RootLayout() {
+// مكوّن داخلي يقرأ loading من AuthContext
+function RootLayoutInner() {
+  const { loading } = useAuth();
+
   useEffect(() => {
-    // أعطِ الأب وقت يحمّل قبل ما تخفي السبلاش
-    const timer = setTimeout(() => {
+    // انتظر حتى ينتهي Firebase من التحقق من الجلسة
+    if (!loading) {
       SplashScreen.hideAsync().catch(() => {});
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
+    }
+  }, [loading]);
 
   return (
-    <AuthProvider>
+    <>
       <Stack screenOptions={{ headerShown: false }} />
       <StatusBar style="auto" />
+    </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootLayoutInner />
     </AuthProvider>
   );
 }
