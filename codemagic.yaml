@@ -25,11 +25,10 @@ workflows:
       - name: Install dependencies
         script: |
           npm install --legacy-peer-deps
-          npm install ajv@^6.12.6 --legacy-peer-deps
 
       - name: Install EAS CLI
         script: |
-          npm install -g eas-cli@latest
+          npm install -g eas-cli@9.2.0
 
       - name: Verify Expo Token
         script: |
@@ -50,3 +49,4 @@ workflows:
         notify:
           success: true
           failure: true
+          
