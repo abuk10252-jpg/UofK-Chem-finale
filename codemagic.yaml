@@ -10,7 +10,7 @@ workflows:
     environment:
       node: 20
       groups:
-        - vars  # السطر ده هو اللي بيخلي الكود يشوف الـ EXPO_TOKEN من الإعدادات
+        - vars # تأكد إنك ضفت التوكن في موقع كود ماجيك تحت قروب اسمه vars
       vars:
         EXPO_PUBLIC_API_URL: https://server-2-xpsh.onrender.com/api
         EXPO_PUBLIC_FIREBASE_API_KEY: AIzaSyBBq6jJ_25f6zPAxKPZew_kh-4UFAQLIEM
@@ -28,14 +28,12 @@ workflows:
       - name: Install EAS CLI
         script: |
           npm install -g eas-cli
-          echo "🚀 EAS CLI installed"
 
       - name: Build APK using EAS
         script: |
           mkdir -p build_output
-          # هنا الـ CLI حيستخدم التوكن اللي في الإعدادات تلقائياً
+          # بنجرب نبني الملف ونشوف لو في خطأ حيطلع لينا في الـ Logs
           eas build -p android --profile preview --non-interactive --local --output=build_output/app.apk
-          echo "📱 APK Build completed locally"
 
     artifacts:
       - build_output/*.apk
@@ -47,3 +45,4 @@ workflows:
         notify:
           success: true
           failure: true
+          
