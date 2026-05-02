@@ -15,16 +15,23 @@ export default function QuizResultsScreen() {
   }, []);
 
   async function loadResults() {
-    try {
-      const data = await apiCall(`/admin/quiz/${id}/results`);
-      setQuizTitle(data.quiz.title);
-      setAttempts(data.attempts);
-    } catch (e) {
-      Alert.alert('Error', 'Failed to load results');
-    } finally {
-      setLoading(false);
+  try {
+    const data = await apiCall(`/admin/quiz/${id}/results`);
+
+    // ✅ FIX: تحقق من data قبل استخدامه
+    if (!data?.quiz) {
+      Alert.alert('Error', 'Failed to load quiz results');
+      return;
     }
+
+    setQuizTitle(data.quiz.title);
+    setAttempts(data.attempts || []);
+  } catch (e) {
+    Alert.alert('Error', 'Failed to load results');
+  } finally {
+    setLoading(false);
   }
+}
 
   if (loading) {
     return (
