@@ -76,30 +76,38 @@ export default function AcademicTab() {
     setEditDescAr(c.description_ar); 
     setEditModal(true);
   }
+  
+async function handleSaveEdit() {
+  if (!editCourse || !editName.trim()) return;
+  setSaving(true);
+  try {
+    const data = await apiCall(`/courses/${editCourse.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: editName.trim(),
+        name_ar: editNameAr.trim(),
+        description: editDesc.trim(),
+        description_ar: editDescAr.trim(),
+      }),
+    });
 
-  async function handleSaveEdit() {
-    if (!editCourse || !editName.trim()) return;
-    setSaving(true);
-    try {
-      const data = await apiCall(`/courses/${editCourse.id}`, { 
-        method: 'PUT', 
-        body: JSON.stringify({ 
-          name: editName.trim(), 
-          name_ar: editNameAr.trim(), 
-          description: editDesc.trim(), 
-          description_ar: editDescAr.trim() 
-        }) 
-      });
-
-      setCourses(prev => prev.map(c => c.id === editCourse.id ? data.course : c));
-      setEditModal(false);
-
-    } catch (e: any) { 
-      Alert.alert('Error', e.message); 
-    } finally { 
-      setSaving(false); 
+    // ✅ FIX: تحقق من data قبل استخدامه
+    if (!data?.course) {
+      Alert.alert('Error', 'Failed to save changes. Please try again.');
+      return;
     }
+
+    setCourses(prev =>
+      prev.map(c => (c.id === editCourse.id ? data.course : c))
+    );
+    setEditModal(false);
+  } catch (e: any) {
+    Alert.alert('Error', e.message || 'An error occurred');
+  } finally {
+    setSaving(false);
   }
+}
+  
 
   async function handleDelete(courseId: string, courseName: string) {
     Alert.alert('Delete Course', `Delete "${courseName}" and all its files?`, [
