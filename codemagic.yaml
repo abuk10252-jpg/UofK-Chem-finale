@@ -25,6 +25,7 @@ workflows:
       - name: Install dependencies
         script: |
           npm install --legacy-peer-deps
+          npm install ajv@^6.12.6 --legacy-peer-deps
 
       - name: Install EAS CLI
         script: |
@@ -49,4 +50,3 @@ workflows:
         notify:
           success: true
           failure: true
-          
