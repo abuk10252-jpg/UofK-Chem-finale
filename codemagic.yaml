@@ -1,3 +1,24 @@
+workflows:
+  react-native-android:
+    name: Android APK Build
+    instance_type: mac_mini_m2
+
+    triggering:
+      events:
+        - push
+
+    environment:
+      node: 20
+      vars:
+        EXPO_TOKEN: $EXPO_TOKEN
+        EXPO_PUBLIC_API_URL: https://server-2-xpsh.onrender.com/api
+        EXPO_PUBLIC_FIREBASE_API_KEY: AIzaSyBBq6jJ_25f6zPAxKPZew_kh-4UFAQLIEM
+        EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: uofk-chem.firebaseapp.com
+        EXPO_PUBLIC_FIREBASE_PROJECT_ID: uofk-chem
+        EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: uofk-chem.firebasestorage.app
+        EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: 647909218035
+        EXPO_PUBLIC_FIREBASE_APP_ID: 1:647909218035:web:6838d2e4e6508c60b44986
+
     scripts:
       - name: Install dependencies
         script: |
@@ -9,9 +30,8 @@
 
       - name: Build APK using EAS
         script: |
-          # هنا بنخلي EAS يطلع رابط التحميل في ملف نصي عشان نأكده
+          mkdir -p build_output
           eas build -p android --profile preview --non-interactive --local --output=build_output/app.apk
-          echo "📱 EAS build completed"
 
     artifacts:
       - build_output/*.apk
@@ -23,3 +43,4 @@
         notify:
           success: true
           failure: true
+          
