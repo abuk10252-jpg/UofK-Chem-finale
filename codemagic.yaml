@@ -65,4 +65,4 @@ workflows:
           success: true
           failure: true
         attachments:
-          - build_output/**
+          
