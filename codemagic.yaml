@@ -19,6 +19,7 @@ workflows:
         EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: uofk-chem.firebasestorage.app
         EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: 647909218035
         EXPO_PUBLIC_FIREBASE_APP_ID: 1:647909218035:web:6838d2e4e6508c60b44986
+        EXPO_TOKEN: bMWq0SDjZ_M2YDXCDwgtcgMtZ286Dl8oPbiEESIy
 
     scripts:
       - name: Install dependencies
@@ -28,6 +29,10 @@ workflows:
       - name: Install EAS CLI
         script: |
           npm install -g eas-cli
+
+      - name: Verify Expo Token
+        script: |
+          expo whoami
 
       - name: Build APK using EAS
         script: |
@@ -44,3 +49,4 @@ workflows:
         notify:
           success: true
           failure: true
+          
