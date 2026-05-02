@@ -10,7 +10,7 @@ workflows:
     environment:
       node: 20
       groups:
-        - vars # تأكد إنك ضفت التوكن في موقع كود ماجيك تحت قروب اسمه vars
+        - vars
       vars:
         EXPO_PUBLIC_API_URL: https://server-2-xpsh.onrender.com/api
         EXPO_PUBLIC_FIREBASE_API_KEY: AIzaSyBBq6jJ_25f6zPAxKPZew_kh-4UFAQLIEM
@@ -31,12 +31,11 @@ workflows:
 
       - name: Build APK using EAS
         script: |
-          mkdir -p build_output
-          # بنجرب نبني الملف ونشوف لو في خطأ حيطلع لينا في الـ Logs
-          eas build -p android --profile preview --non-interactive --local --output=build_output/app.apk
+          mkdir -p $CM_BUILD_DIR/build_output
+          eas build -p android --profile preview --non-interactive --local --output=$CM_BUILD_DIR/build_output/app.apk
 
     artifacts:
-      - build_output/*.apk
+      - $CM_BUILD_DIR/build_output/*.apk
 
     publishing:
       email:
@@ -45,4 +44,3 @@ workflows:
         notify:
           success: true
           failure: true
-          
