@@ -26,33 +26,28 @@ workflows:
           rm -rf package-lock.json
           rm -rf .expo
           rm -rf .expo-shared
-          rm -rf android/.gradle
-          rm -rf android/build
-          rm -rf .gradle
           echo "🧹 All caches cleaned"
 
-      - name: Install dependencies (safe mode)
+      - name: Install dependencies
         script: |
           npm install --legacy-peer-deps
-          echo "📦 Dependencies installed"
 
-      - name: Expo Prebuild
+      - name: Build APK using Expo
         script: |
-          npx expo prebuild --clean --platform android
-          echo "🏗️ Expo prebuild completed"
+          npx expo build:android -t apk --non-interactive
 
-      - name: Build Android APK
-        script: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleRelease
-      - name: Copy APK
+      - name: Copy APK to output
         script: |
           mkdir -p build_output
-          find android/app/build/outputs/apk/release -name "*.apk" -type f -exec cp {} build_output/ \;
+          find . -name "*.apk" -type f -exec cp {} build_output/ \;
+
     artifacts:
       - build_output/**
+
     publishing:
       email:
         recipients:
           - abuk10252@gmail.com
+        notify:
+          success: true
+          failure: true
