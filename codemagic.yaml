@@ -51,7 +51,7 @@ workflows:
       - name: Copy APK to output
         script: |
           mkdir -p build_output
-          find android/app/build/outputs/apk/release -name "*.apk" -type f -exec cp {} build_output/ ;
+          find android/app/build/outputs -name "*.apk" -type f -exec cp {} build_output/ \;
           echo "📤 APK copied to output"
 
     artifacts:
@@ -64,3 +64,5 @@ workflows:
         notify:
           success: true
           failure: true
+        attachments:
+          - build_output/**
