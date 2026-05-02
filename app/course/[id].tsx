@@ -27,14 +27,23 @@ export default function CourseDetailScreen() {
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => { fetchCourse(); }, [id]);
+  
+async function fetchCourse() {
+  try {
+    const data = await apiCall(`/courses/${id}`);
 
-  async function fetchCourse() {
-    try {
-      const data = await apiCall(`/courses/${id}`);
+    // ✅ FIX: تحقق من data قبل استخدامه
+    if (data?.course) {
       setCourse(data.course);
-      setFiles(data.files);
-    } catch {} finally { setLoading(false); }
+      setFiles(data.files || []);
+    }
+  } catch {
+    // الكورس مش موجود أو خطأ في الشبكة
+  } finally {
+    setLoading(false);
   }
+}
+  
 
   async function handleUpload() {
     try {
