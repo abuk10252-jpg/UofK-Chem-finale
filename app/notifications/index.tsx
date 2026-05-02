@@ -9,12 +9,16 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
 
   async function load() {
-    try {
-      const data = await apiCall("/notifications");
-      setNotifications(data.notifications || []);
-    } finally {
-      setLoading(false);
+  try {
+    const data = await apiCall("/notifications");
+
+    // ✅ FIX: تحقق من data قبل استخدامه
+    if (data?.notifications) {
+      setNotifications(data.notifications);
     }
+  } finally {
+    setLoading(false);
+  }
   }
 
   useEffect(() => {
