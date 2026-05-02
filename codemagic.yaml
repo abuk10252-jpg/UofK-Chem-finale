@@ -26,10 +26,6 @@ workflows:
         script: |
           npm install --legacy-peer-deps
 
-      - name: Fix ajv compatibility
-        script: |
-          npm install ajv@^8.0.0 --legacy-peer-deps
-
       - name: Install EAS CLI
         script: |
           npm install -g eas-cli@latest
@@ -53,3 +49,4 @@ workflows:
         notify:
           success: true
           failure: true
+          
