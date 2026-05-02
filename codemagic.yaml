@@ -7,9 +7,6 @@ workflows:
         - push
     environment:
       vars:
-        APP_NAME: "UofK Chem"
-        PACKAGE_NAME: "com.uofkchem.app"
-        SERVER_URL: "https://server-2-xpsh.onrender.com"
         EXPO_PUBLIC_API_URL: https://server-2-xpsh.onrender.com/api
         EXPO_PUBLIC_FIREBASE_API_KEY: AIzaSyBBq6jJ_25f6zPAxKPZew_kh-4UFAQLIEM
         EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: uofk-chem.firebaseapp.com
@@ -19,22 +16,33 @@ workflows:
         EXPO_PUBLIC_FIREBASE_APP_ID: 1:647909218035:web:6838d2e4e6508c60b44986
       node: 20
     scripts:
+      - name: Remove yarn.lock to force npm usage
+        script: |
+          rm -f yarn.lock
+          echo "✅ yarn.lock removed — will use npm"
+
       - name: Install dependencies
         script: |
           npm install
-          npx expo install --fix
+
+      - name: Fix Expo package versions
+        script: |
+          npx expo install --fix --npm
+
       - name: Expo Prebuild
         script: |
           npx expo prebuild --clean --platform android
+
       - name: Build Android APK
         script: |
           cd android
           chmod +x gradlew
           ./gradlew assembleRelease
-      - name: Copy APK
+
+      - name: Copy APK to output
         script: |
           mkdir -p build_output
-          find android/app/build/outputs/apk/release -name "*.apk" -type f -exec cp {} build_output/ \;
+          find android/app/build/outputs/apk/release -name "*.apk" -type f -exec cp {} build_output/ ;
     artifacts:
       - build_output/**
     publishing:
