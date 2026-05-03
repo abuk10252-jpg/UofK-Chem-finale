@@ -28,7 +28,7 @@ workflows:
 
       - name: Install EAS CLI
         script: |
-          npm install -g eas-cli@9.2.0
+          npm install -g eas-cli@latest
 
       - name: Verify Expo Token
         script: |
@@ -49,3 +49,4 @@ workflows:
         notify:
           success: true
           failure: true
+          
