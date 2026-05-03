@@ -25,7 +25,12 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
-  register: (data: { email: string; university_id: string; name: string; password: string }) => Promise<User>;
+  register: (data: {
+    email: string;
+    university_id: string;
+    name: string;
+    password: string;
+  }) => Promise<User>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
@@ -38,35 +43,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // مستمع Firebase - يشتغل تلقائياً عند تحميل التطبيق
-    // لو في جلسة محفوظة (من AsyncStorage)، Firebase يستعيدها ويجدد التوكن
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         if (firebaseUser) {
-          // احصل على توكن طازج وخزّنه
-          const freshToken = await firebaseUser.getIdToken();
+          // احصل على توكن طازج مع force refresh
+          const freshToken = await firebaseUser.getIdToken(true);
           await AsyncStorage.setItem("token", freshToken);
 
           // اجلب بيانات المستخدم من السيرفر
           const data = await apiCall("/auth/me");
+
           if (data?.user) {
             setUser(data.user);
             await AsyncStorage.setItem("user", JSON.stringify(data.user));
           } else {
             // لو السيرفر فشل، استخدم البيانات المحفوظة
             const savedUser = await AsyncStorage.getItem("user");
-            if (savedUser) setUser(JSON.parse(savedUser));
+            if (savedUser) {
+              try {
+                setUser(JSON.parse(savedUser));
+              } catch {
+                await AsyncStorage.multiRemove(["user", "token"]);
+                setUser(null);
+              }
+            }
           }
         } else {
-          // لا يوجد مستخدم في Firebase - تحقق من AsyncStorage
+          // لا يوجد مستخدم في Firebase
           const savedUser = await AsyncStorage.getItem("user");
           const savedToken = await AsyncStorage.getItem("token");
+
           if (savedUser && savedToken) {
             try {
               setUser(JSON.parse(savedUser));
             } catch {
               await AsyncStorage.multiRemove(["user", "token"]);
+              setUser(null);
             }
+          } else {
+            setUser(null);
           }
         }
       } catch (error) {
@@ -74,8 +89,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // تحميل احتياطي من AsyncStorage
         try {
           const savedUser = await AsyncStorage.getItem("user");
-          if (savedUser) setUser(JSON.parse(savedUser));
-        } catch {}
+          if (savedUser) {
+            setUser(JSON.parse(savedUser));
+          } else {
+            setUser(null);
+          }
+        } catch {
+          setUser(null);
+        }
       } finally {
         setLoading(false);
       }
@@ -117,10 +138,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: string;
     university_id: string;
     name: string;
-    password: string
+    password: string;
   }): Promise<User> {
     try {
-      const cred = await createUserWithEmailAndPassword(auth, regData.email, regData.password);
+      const cred = await createUserWithEmailAndPassword(
+        auth,
+        regData.email,
+        regData.password
+      );
 
       const idToken = await cred.user.getIdToken(true);
       await AsyncStorage.setItem("token", idToken);
@@ -182,7 +207,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       register,
       logout,
       refreshUser,
-      setUser
+      setUser,
     }}>
       {children}
     </AuthContext.Provider>
