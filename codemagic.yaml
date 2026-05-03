@@ -22,6 +22,10 @@ workflows:
         EXPO_TOKEN: z5qnErkCgElXTb0npYT-Ho12TgqNlFuxtoDaMmI5
 
     scripts:
+      - name: Disable local Gradle build
+        script: |
+          echo "⚠️ Skipping local Gradle build — using EAS Cloud only"
+
       - name: Install dependencies
         script: |
           npm install --legacy-peer-deps
