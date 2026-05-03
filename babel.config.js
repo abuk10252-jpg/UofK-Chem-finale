@@ -5,7 +5,7 @@ module.exports = function (api) {
       ['babel-preset-expo', { jsxImportSource: 'react' }]
     ],
     plugins: [
-      'react-native-reanimated/plugin', // لازم يكون آخر plugin
+      'react-native-reanimated/plugin',
     ],
   };
 };
