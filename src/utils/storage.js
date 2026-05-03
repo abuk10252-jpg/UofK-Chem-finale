@@ -1,30 +1,48 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// 🔥 تخزين أي بيانات
+// تخزين أي بيانات
 export async function saveItem(key, value) {
   try {
     await AsyncStorage.setItem(key, JSON.stringify(value));
   } catch (e) {
-    console.log("Storage Save Error:", e);
+    console.warn("Storage Save Error:", e);
   }
 }
 
-// 🔥 قراءة أي بيانات
+// قراءة أي بيانات
 export async function getItem(key) {
   try {
     const value = await AsyncStorage.getItem(key);
     return value ? JSON.parse(value) : null;
   } catch (e) {
-    console.log("Storage Read Error:", e);
+    console.warn("Storage Read Error:", e);
     return null;
   }
 }
 
-// 🔥 حذف بيانات
+// حذف بيانات
 export async function removeItem(key) {
   try {
     await AsyncStorage.removeItem(key);
   } catch (e) {
-    console.log("Storage Remove Error:", e);
+    console.warn("Storage Remove Error:", e);
+  }
+}
+
+// حذف أكثر من مفتاح مع بعض
+export async function removeItems(keys) {
+  try {
+    await AsyncStorage.multiRemove(keys);
+  } catch (e) {
+    console.warn("Storage MultiRemove Error:", e);
+  }
+}
+
+// مسح كل البيانات
+export async function clearAll() {
+  try {
+    await AsyncStorage.clear();
+  } catch (e) {
+    console.warn("Storage Clear Error:", e);
   }
 }
