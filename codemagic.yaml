@@ -26,21 +26,31 @@ workflows:
         script: |
           npm install --legacy-peer-deps
 
-      - name: Install EAS CLI
+      - name: Expo Prebuild
         script: |
-          npm install -g eas-cli@latest
+          npx expo prebuild --platform android --clean
 
-      - name: Verify Expo Token
+      - name: Fix Kotlin and Gradle
         script: |
-          eas whoami
+          echo "kotlinVersion=1.9.24" >> android/gradle.properties
+          echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> android/gradle.properties
+          echo "android.useAndroidX=true" >> android/gradle.properties
+          echo "android.enableJetifier=true" >> android/gradle.properties
 
-      - name: Build APK using EAS
+      - name: Build Android APK
+        script: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease
+
+      - name: Copy APK
         script: |
           mkdir -p $CM_BUILD_DIR/build_output
-          eas build -p android --profile preview --non-interactive --local --output=$CM_BUILD_DIR/build_output/app.apk
+          find android/app/build/outputs/apk/release -name "*.apk" -type f \
+            -exec cp {} $CM_BUILD_DIR/build_output/ \;
 
     artifacts:
-      - $CM_BUILD_DIR/build_output/*.apk
+      - $CM_BUILD_DIR/build_output/**
 
     publishing:
       email:
