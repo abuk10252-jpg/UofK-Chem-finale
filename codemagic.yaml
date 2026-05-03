@@ -26,31 +26,42 @@ workflows:
         script: |
           npm install --legacy-peer-deps
 
+      - name: Install EAS CLI
+        script: |
+          npm install -g eas-cli@latest
+
+      - name: Verify Expo Token
+        script: |
+          eas whoami
+
       - name: Expo Prebuild
         script: |
           npx expo prebuild --platform android --clean
 
-      - name: Fix Kotlin and Gradle
+      - name: Fix Gradle Wrapper
         script: |
-          echo "kotlinVersion=1.9.24" >> android/gradle.properties
+          cat > android/gradle/wrapper/gradle-wrapper.properties << 'EOF'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.8-bin.zip
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+
+      - name: Fix gradle.properties
+        script: |
+          echo "kotlinVersion=2.1.0" >> android/gradle.properties
           echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> android/gradle.properties
           echo "android.useAndroidX=true" >> android/gradle.properties
           echo "android.enableJetifier=true" >> android/gradle.properties
 
-      - name: Build Android APK
-        script: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleRelease
-
-      - name: Copy APK
+      - name: Build APK using EAS
         script: |
           mkdir -p $CM_BUILD_DIR/build_output
-          find android/app/build/outputs/apk/release -name "*.apk" -type f \
-            -exec cp {} $CM_BUILD_DIR/build_output/ \;
+          eas build -p android --profile preview --non-interactive --local --output=$CM_BUILD_DIR/build_output/app.apk
 
     artifacts:
-      - $CM_BUILD_DIR/build_output/**
+      - $CM_BUILD_DIR/build_output/*.apk
 
     publishing:
       email:
