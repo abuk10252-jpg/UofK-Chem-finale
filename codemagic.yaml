@@ -12,6 +12,7 @@ workflows:
       groups:
         - vars
       vars:
+        EXPO_TOKEN: z5qnErkCgElXTb0npYT-Ho12TgqNlFuxtoDaMmI5
         EXPO_PUBLIC_API_URL: https://server-2-xpsh.onrender.com/api
         EXPO_PUBLIC_FIREBASE_API_KEY: AIzaSyBBq6jJ_25f6zPAxKPZew_kh-4UFAQLIEM
         EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: uofk-chem.firebaseapp.com
@@ -19,7 +20,6 @@ workflows:
         EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: uofk-chem.firebasestorage.app
         EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: 647909218035
         EXPO_PUBLIC_FIREBASE_APP_ID: 1:647909218035:web:6838d2e4e6508c60b44986
-        EXPO_TOKEN: z5qnErkCgElXTb0npYT-Ho12TgqNlFuxtoDaMmI5
 
     scripts:
       - name: Install dependencies
@@ -34,34 +34,19 @@ workflows:
         script: |
           eas whoami
 
-      - name: Expo Prebuild
+      - name: Build APK on EAS Cloud
         script: |
-          npx expo prebuild --platform android --clean
+          eas build --platform android --profile preview --non-interactive --wait
 
-      - name: Fix Gradle Wrapper
-        script: |
-          cat > android/gradle/wrapper/gradle-wrapper.properties << 'EOF'
-          distributionBase=GRADLE_USER_HOME
-          distributionPath=wrapper/dists
-          distributionUrl=https\://services.gradle.org/distributions/gradle-8.8-bin.zip
-          zipStoreBase=GRADLE_USER_HOME
-          zipStorePath=wrapper/dists
-          EOF
-
-      - name: Fix gradle.properties
-        script: |
-          echo "kotlinVersion=2.1.0" >> android/gradle.properties
-          echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> android/gradle.properties
-          echo "android.useAndroidX=true" >> android/gradle.properties
-          echo "android.enableJetifier=true" >> android/gradle.properties
-
-      - name: Build APK using EAS
+      - name: Download APK
         script: |
           mkdir -p $CM_BUILD_DIR/build_output
-          eas build -p android --profile preview --non-interactive --local --output=$CM_BUILD_DIR/build_output/app.apk
+          eas build:list --platform android --limit 1 --json \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['artifacts']['buildUrl'])" \
+            | xargs curl -L -o $CM_BUILD_DIR/build_output/app.apk
 
     artifacts:
-      - $CM_BUILD_DIR/build_output/*.apk
+      - $CM_BUILD_DIR/build_output/**
 
     publishing:
       email:
