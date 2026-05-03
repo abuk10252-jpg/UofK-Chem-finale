@@ -34,6 +34,11 @@ workflows:
         script: |
           eas whoami
 
+      - name: Fix Kotlin Version
+        script: |
+          echo "kotlinVersion=2.1.0" >> android/gradle.properties
+          echo "org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m" >> android/gradle.properties
+
       - name: Build APK using EAS
         script: |
           mkdir -p $CM_BUILD_DIR/build_output
@@ -49,4 +54,3 @@ workflows:
         notify:
           success: true
           failure: true
-          
