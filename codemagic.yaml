@@ -2,9 +2,7 @@ workflows:
   react-native-android:
     name: Android APK Build
     instance_type: mac_mini_m2
-
-    android:
-      build: false   # ⛔ تعطيل بناء Gradle المحلي نهائياً
+    skip_build: true   # ⛔ تعطيل أي بناء محلي
 
     triggering:
       events:
@@ -61,4 +59,3 @@ workflows:
         notify:
           success: true
           failure: true
-          
