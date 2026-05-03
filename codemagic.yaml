@@ -34,7 +34,6 @@ workflows:
         script: |
           eas whoami
 
-      
       - name: Build APK using EAS
         script: |
           mkdir -p $CM_BUILD_DIR/build_output
