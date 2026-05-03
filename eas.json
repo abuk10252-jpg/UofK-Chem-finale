@@ -7,12 +7,10 @@
     "preview": {
       "distribution": "internal",
       "android": {
-        "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease"
+        "buildType": "apk"
       },
       "env": {
-        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
-        "ORG_GRADLE_PROJECT_kotlinVersion": "2.1.0"
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
       }
     },
     "production": {
@@ -20,8 +18,7 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
-        "ORG_GRADLE_PROJECT_kotlinVersion": "2.1.0"
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
       }
     }
   }
