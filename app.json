@@ -7,7 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "uofkchem",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
 
     "ios": {
       "supportsTablet": true,
@@ -40,7 +39,12 @@
           "backgroundColor": "#002147"
         }
       ],
-      "expo-document-picker"
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
+      ]
     ],
 
     "experiments": {
