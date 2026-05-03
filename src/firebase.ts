@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { initializeAuth, getAuth, browserLocalPersistence } from "firebase/auth";
-import { getReactNativePersistence } from "@firebase/auth/dist/rn/index.js";
+import { getAuth, initializeAuth } from "firebase/auth";
+import { getReactNativePersistence } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
 
@@ -18,20 +18,15 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 let auth;
 
 try {
-  if (Platform.OS === "web") {
-    auth = initializeAuth(app, {
-      persistence: browserLocalPersistence,
-    });
-  } else {
+  if (Platform.OS !== "web") {
     auth = initializeAuth(app, {
       persistence: getReactNativePersistence(AsyncStorage),
     });
+  } else {
+    auth = getAuth(app);
   }
-} catch (error: any) {
-  // لو اتهيأ قبل كده نرجع الـ instance الموجود
+} catch (error) {
   auth = getAuth(app);
 }
-
-console.log("✅ Firebase initialized:", firebaseConfig.projectId);
 
 export { auth, app };
