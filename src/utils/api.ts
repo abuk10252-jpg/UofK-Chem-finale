@@ -3,28 +3,38 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import { auth } from '../firebase';
 
-const BASE_URL = Constants.expoConfig?.extra?.API_URL || "";
+const BASE_URL = (
+  process.env.EXPO_PUBLIC_API_URL ||
+  Constants.expoConfig?.extra?.API_URL ||
+  ""
+).replace(/\/$/, "");
 
 if (!BASE_URL) {
-  console.warn("⚠️ WARNING: API_URL is missing in app.json");
+  console.warn("⚠️ WARNING: API_URL is missing");
 }
 
 /**
- * الحصول على توكن صالح:
- * - يجرب Firebase أولاً (يجدد تلقائياً لو انتهت صلاحيته)
- * - يرجع للـ AsyncStorage كاحتياط
+ * الحصول على توكن صالح
  */
 async function getFreshToken(): Promise<string | null> {
   try {
     if (auth.currentUser) {
-      const token = await auth.currentUser.getIdToken();
+      // force: true يجدد التوكن لو انتهت صلاحيته
+      const token = await auth.currentUser.getIdToken(true);
       await AsyncStorage.setItem("token", token);
       return token;
     }
   } catch (e) {
     console.warn("Firebase getIdToken failed, falling back to stored token:", e);
   }
-  return AsyncStorage.getItem("token");
+
+  // fallback للـ AsyncStorage
+  try {
+    return await AsyncStorage.getItem("token");
+  } catch (e) {
+    console.warn("AsyncStorage getItem failed:", e);
+    return null;
+  }
 }
 
 /**
@@ -35,8 +45,10 @@ export async function apiCall(
   options: RequestInit = {}
 ): Promise<any> {
   try {
+    // التحقق من الإنترنت بشكل أدق
     const netInfo = await NetInfo.fetch();
-    if (!netInfo.isConnected) {
+    if (!netInfo.isConnected || !netInfo.isInternetReachable) {
+      console.warn("No internet connection");
       return { offline: true };
     }
 
@@ -44,38 +56,60 @@ export async function apiCall(
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      ...(options.headers as any),
     };
+
+    // دمج الهيدرز بشكل آمن
+    if (options.headers) {
+      const optHeaders = options.headers as Record<string, string>;
+      Object.keys(optHeaders).forEach(key => {
+        headers[key] = optHeaders[key];
+      });
+    }
 
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 15000);
 
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
-      signal: controller.signal,
-    });
+    let response: Response;
+
+    try {
+      response = await fetch(`${BASE_URL}${endpoint}`, {
+        ...options,
+        headers,
+        signal: controller.signal,
+      });
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      // التحقق لو الخطأ بسبب timeout
+      if (fetchError?.name === 'AbortError') {
+        console.warn(`Request timeout on ${endpoint}`);
+        return { timeout: true };
+      }
+      throw fetchError;
+    }
 
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      const text = await response.text();
-      console.warn(`API Error ${response.status}:`, text);
+      const text = await response.text().catch(() => "");
+      console.warn(`API Error ${response.status} on ${endpoint}:`, text);
       return null;
     }
 
     try {
       return await response.json();
     } catch {
+      // لو الرد مو JSON رجع null
       return null;
     }
 
-  } catch (error) {
-    console.warn(`API Call Error on ${endpoint}:`, error);
+  } catch (error: any) {
+    console.warn(`API Call Error on ${endpoint}:`, error?.message || error);
     return null;
   }
 }
@@ -117,35 +151,53 @@ export async function apiDelete(endpoint: string) {
 /**
  * رفع ملف (multipart/form-data)
  */
-export async function uploadFile(endpoint: string, formData: FormData): Promise<any> {
+export async function uploadFile(
+  endpoint: string,
+  formData: FormData
+): Promise<any> {
   try {
     const netInfo = await NetInfo.fetch();
-    if (!netInfo.isConnected) return { offline: true };
+    if (!netInfo.isConnected || !netInfo.isInternetReachable) {
+      return { offline: true };
+    }
 
     const token = await getFreshToken();
     const headers: Record<string, string> = {};
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 60000); // زيادة timeout لرفع الملفات
 
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method: 'POST',
-      headers,
-      body: formData,
-      signal: controller.signal,
-    });
+    let response: Response;
+
+    try {
+      response = await fetch(`${BASE_URL}${endpoint}`, {
+        method: 'POST',
+        headers,
+        body: formData,
+        signal: controller.signal,
+      });
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      if (fetchError?.name === 'AbortError') {
+        throw new Error('Upload timeout - الملف كبير جداً أو الإنترنت بطيء');
+      }
+      throw fetchError;
+    }
 
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      const text = await response.text();
+      const text = await response.text().catch(() => "");
       throw new Error(text || `Upload failed with status ${response.status}`);
     }
 
     return await response.json();
+
   } catch (error: any) {
-    console.warn(`Upload Error on ${endpoint}:`, error);
+    console.warn(`Upload Error on ${endpoint}:`, error?.message || error);
     throw error;
   }
 }
