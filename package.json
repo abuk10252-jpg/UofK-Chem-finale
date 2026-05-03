@@ -8,9 +8,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "clean": "rm -rf node_modules package-lock.json && npm install",
-    "build:android": "eas build --platform android --clear-cache",
-    "build:preview": "eas build --platform android --profile preview --clear-cache"
+    "clean": "rm -rf node_modules package-lock.json yarn.lock && npm install --legacy-peer-deps"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.0",
@@ -42,21 +40,26 @@
     "react-native-web": "0.21.2"
   },
   "devDependencies": {
-    "@babel/core": "7.25.2",
+    "@babel/core": "^7.25.2",
+    "@babel/preset-env": "^7.25.0",
+    "@babel/runtime": "^7.25.0",
     "@types/react": "19.2.10",
     "ajv": "^8.12.0",
     "ajv-keywords": "^5.1.0",
+    "babel-preset-expo": "~12.0.0",
     "eslint": "8.57.0",
     "eslint-config-expo": "55.0.0",
     "typescript": "5.9.2"
   },
   "resolutions": {
     "ajv": "^8.12.0",
-    "ajv-keywords": "^5.1.0"
+    "ajv-keywords": "^5.1.0",
+    "@babel/core": "^7.25.2"
   },
   "overrides": {
     "ajv": "^8.12.0",
-    "ajv-keywords": "^5.1.0"
+    "ajv-keywords": "^5.1.0",
+    "@babel/core": "^7.25.2"
   },
   "private": true
 }
