@@ -4,23 +4,33 @@ import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
 
+// منع SplashScreen من الاختفاء التلقائي
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-// مكوّن داخلي يقرأ loading من AuthContext
 function RootLayoutInner() {
   const { loading } = useAuth();
 
   useEffect(() => {
-    // انتظر حتى ينتهي Firebase من التحقق من الجلسة
     if (!loading) {
-      SplashScreen.hideAsync().catch(() => {});
+      // تأخير بسيط عشان الشاشة ما تومض
+      const timer = setTimeout(() => {
+        SplashScreen.hideAsync().catch(() => {});
+      }, 300);
+      return () => clearTimeout(timer);
     }
   }, [loading]);
 
   return (
     <>
-      <Stack screenOptions={{ headerShown: false }} />
-      <StatusBar style="auto" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'fade',
+          // منع الشاشة البيضاء بين الصفحات
+          contentStyle: { backgroundColor: '#002147' },
+        }}
+      />
+      <StatusBar style="light" />
     </>
   );
 }
