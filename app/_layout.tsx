@@ -2,12 +2,12 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { AuthProvider, useAuth } from '../src/context/AuthContext';
+import { NotificationProvider } from '../src/context/NotificationContext';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import * as Updates from 'expo-updates';
 
-// Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
@@ -17,12 +17,10 @@ function RootLayoutNav() {
   const [appIsReady, setAppIsReady] = useState(false);
   const [fontLoaded, setFontLoaded] = useState(false);
 
-  // Load fonts
   useEffect(() => {
     async function loadFonts() {
       try {
         await Font.loadAsync({
-          // ✅ أزلنا ...Ionicons.font - مش محتاجينه
           'SpaceMono': require('../assets/fonts/SpaceMono-Regular.ttf'),
         });
       } catch (e) {
@@ -34,7 +32,6 @@ function RootLayoutNav() {
     loadFonts();
   }, []);
 
-  // Check for updates
   const checkForUpdates = useCallback(async () => {
     try {
       const update = await Updates.checkForUpdateAsync();
@@ -51,7 +48,6 @@ function RootLayoutNav() {
     checkForUpdates();
   }, [checkForUpdates]);
 
-  // Handle navigation based on auth state
   useEffect(() => {
     if (!fontLoaded || loading) return;
 
@@ -72,7 +68,6 @@ function RootLayoutNav() {
     }
   }, [user, loading, fontLoaded, segments]);
 
-  // Hide splash screen when ready
   const onLayoutRootView = useCallback(async () => {
     if (fontLoaded && !loading) {
       await SplashScreen.hideAsync();
@@ -80,7 +75,6 @@ function RootLayoutNav() {
     }
   }, [fontLoaded, loading]);
 
-  // ✅ إضافة useEffect عشان نادي onLayoutRootView
   useEffect(() => {
     onLayoutRootView();
   }, [onLayoutRootView]);
@@ -118,9 +112,10 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      {/* ✅ أزلنا NotificationProvider لأنه مش موجود */}
-      <StatusBar style="auto" />
-      <RootLayoutNav />
+      <NotificationProvider>
+        <StatusBar style="auto" />
+        <RootLayoutNav />
+      </NotificationProvider>
     </AuthProvider>
   );
 }
