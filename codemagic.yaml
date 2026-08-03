@@ -24,6 +24,9 @@ workflows:
       - name: Install dependencies
         script: |
           npm install
+      - name: Fix Expo dependencies
+        script: |
+          npx expo install --fix
       - name: Install EAS CLI
         script: |
           npm install -g eas-cli
