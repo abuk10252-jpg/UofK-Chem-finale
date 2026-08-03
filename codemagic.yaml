@@ -5,6 +5,15 @@ workflows:
     environment:
       vars:
         EXPO_TOKEN: hJr5aBsOchGLpKQKvOUf0PNRZOzflu1A14Amc_g5
+        EXPO_PUBLIC_FIREBASE_API_KEY: AIzaSyDp3Bw-WYr6S4xFsMS7xR6H4VpH7_Xq0nA
+        EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: uofk-chem-finale.firebaseapp.com
+        EXPO_PUBLIC_FIREBASE_PROJECT_ID: uofk-chem-finale
+        EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET: uofk-chem-finale.firebasestorage.app
+        EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "479367291084"
+        EXPO_PUBLIC_FIREBASE_APP_ID: 1:479367291084:web:a37e72da88b780bcfb9e69
+        EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID: G-9EFLZQMRC0
+        EXPO_PUBLIC_SUPABASE_URL: https://ugxqbyzqdbkiavajhkft.supabase.co
+        EXPO_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVneHFieXpxZGJraWF2YWpoa2Z0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2NjMwMjQsImV4cCI6MjA1OTIzOTAyNH0.AC9VcW3IFKk8PPJtM_IBzqPg_PdC_C_bmfsXVRFLAwE
       node: 20.19.2
     triggering:
       events:
