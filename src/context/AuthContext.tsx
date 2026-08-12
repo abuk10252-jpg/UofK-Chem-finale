@@ -12,12 +12,14 @@ import { auth, db } from '../firebase';
 
 // ✅ أزلنا useRouter اللي مش مستخدم
 
-type UserRole = 'student' | 'admin' | 'super-admin' | 'pending' | null;
+type UserRole = 'student' | 'admin' | 'super_admin' | null;
+type UserStatus = 'pending' | 'approved' | 'rejected' | null;
 
 interface AuthUser {
   uid: string;
   email: string;
   role: UserRole;
+  status: UserStatus;
   displayName?: string;
   universityId?: string;
 }
@@ -29,6 +31,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, displayName: string, universityId: string) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<{ success: boolean; message: string }>;
   resetPassword: (email: string) => Promise<{ success: boolean; message: string }>;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -47,7 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email!,
-              role: userData.role || 'pending',
+              role: userData.role || 'student',
+              status: userData.status || 'pending',
               displayName: userData.displayName,
               universityId: userData.universityId,
             });
@@ -55,7 +59,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email!,
-              role: 'pending',
+              role: 'student',
+              status: 'pending',
             });
           }
         } else {
@@ -79,7 +84,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        if (userData.role === 'pending' || !userData.role) {
+        if (userData.status === 'rejected') {
+          await signOut(auth);
+          return { success: false, message: 'تم رفض طلب حسابك من قبل الإدارة' };
+        }
+        if (userData.status === 'pending' || !userData.status) {
           return {
             success: true,
             message: 'حسابك قيد المراجعة. سيتم تفعيل حسابك قريباً.',
@@ -116,7 +125,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         displayName,
         universityId,
-        role: 'pending',
+        role: 'student',
+        status: 'pending',
         createdAt: new Date().toISOString(),
       });
 
@@ -146,6 +156,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      if (!auth.currentUser) return;
+      const userDoc = await getDoc(doc(db, 'users', auth.currentUser.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setUser({
+          uid: auth.currentUser.uid,
+          email: auth.currentUser.email!,
+          role: userData.role || 'student',
+          status: userData.status || 'pending',
+          displayName: userData.displayName,
+          universityId: userData.universityId,
+        });
+      }
+    } catch (error) {
+      console.warn('Error refreshing user:', error);
+    }
+  };
+
   const resetPassword = async (email: string) => {
     try {
       await sendPasswordResetEmail(auth, email);
@@ -160,7 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, logout, resetPassword }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, logout, resetPassword, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
