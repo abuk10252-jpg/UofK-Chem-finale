@@ -32,7 +32,7 @@ workflows:
           npm install -g eas-cli
       - name: Build APK
         script: |
-          eas init --non-interactive || true
+          eas init --non-interactive --force
           eas build --platform android --profile preview --non-interactive
     artifacts:
       - build/**/*.apk
