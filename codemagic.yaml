@@ -4,7 +4,7 @@ workflows:
     name: UOFK Chem Android Build
     environment:
       vars:
-        EXPO_TOKEN: -zDVoIrvDd61XbicAARS0ndEqtd8uvgW1uSPqtH8
+        EXPO_TOKEN: hJr5aBsOchGLpKQKvOUf0PNRZOzflu1A14Amc_g5
         EXPO_PUBLIC_FIREBASE_API_KEY: AIzaSyDp3Bw-WYr6S4xFsMS7xR6H4VpH7_Xq0nA
         EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: uofk-chem-finale.firebaseapp.com
         EXPO_PUBLIC_FIREBASE_PROJECT_ID: uofk-chem-finale
@@ -32,6 +32,7 @@ workflows:
           npm install -g eas-cli
       - name: Build APK
         script: |
+          eas init --non-interactive || true
           eas build --platform android --profile preview --non-interactive
     artifacts:
       - build/**/*.apk
